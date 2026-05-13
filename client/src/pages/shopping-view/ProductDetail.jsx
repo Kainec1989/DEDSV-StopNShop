@@ -1,65 +1,70 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useCart } from '../../context/CartContext';
+import { Link, useParams } from 'react-router-dom';
+import { useProductData } from '../../hooks/useProductData';
 
+/**
+ * Product detail page — layout and markup only; data and actions come from {@link useProductData}.
+ */
 function ProductDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedSize, setSelectedSize] = useState('');
+  const {
+    product,
+    loading,
+    error,
+    notFound,
+    selectedSize,
+    handleSizeChange,
+    handleAddToCart,
+  } = useProductData(id);
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(`/api/products/${id}`);
-        if (!response.data.sizes || !Array.isArray(response.data.sizes)) {
-          console.error('Invalid sizes data:', response.data.sizes);
-        }
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center text-gray-600">
+        Loading…
+      </div>
+    );
+  }
 
-        setProduct(response.data);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        setError('Product not found');
-      } finally {
-        setLoading(false);
-      }
-    };
+  if (notFound) {
+    return (
+      <div className="container mx-auto px-4 py-16 max-w-lg text-center">
+        <p className="text-sm font-semibold tracking-widest text-gray-500 uppercase mb-2">
+          Error 404
+        </p>
+        <h1 className="text-3xl font-semibold text-gray-900 mb-3">
+          Product not found
+        </h1>
+        <p className="text-gray-600 mb-8">
+          This product does not exist or is no longer available. Check the link or browse the store
+          to find what you need.
+        </p>
+        <Link
+          to="/"
+          className="inline-block px-6 py-2.5 bg-black text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+        >
+          Back to home
+        </Link>
+      </div>
+    );
+  }
 
-    fetchProduct();
-  }, [id]);
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-16 max-w-lg text-center">
+        <h1 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h1>
+        <p className="text-gray-600 mb-8">{error}</p>
+        <Link
+          to="/"
+          className="inline-block px-6 py-2.5 border border-gray-300 text-sm font-medium rounded hover:bg-gray-50 transition-colors"
+        >
+          Back to home
+        </Link>
+      </div>
+    );
+  }
 
-  const handleSizeChange = (e) => {
-    setSelectedSize(e.target.value);
-  };
-
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      alert('Please select a size');
-      return;
-    }
-
-    const sizeInfo = product.sizes.find(s => s.size === selectedSize);
-    if (!sizeInfo || sizeInfo.countInStock === 0) {
-      alert('Selected size is out of stock');
-      return;
-    }
-
-    addToCart({
-      ...product,
-      selectedSize,
-      quantity: 1
-    });
-
-    navigate('/cart');
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-  if (!product) return <div>Product not found</div>;
+  if (!product) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 mt-8">
@@ -112,11 +117,12 @@ function ProductDetail() {
           <div className="text-gray-700 text-sm mb-4">{product.description}</div>
 
           <button
+            type="button"
             onClick={handleAddToCart}
             disabled={!selectedSize}
             className={`w-full py-2 px-4 rounded ${!selectedSize
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-black text-white hover:bg-gray-800'
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-black text-white hover:bg-gray-800'
               }`}
           >
             {!selectedSize ? 'SELECT SIZE' : 'ADD TO CART'}

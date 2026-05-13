@@ -1,3 +1,4 @@
+# Local stack: copy server/.env.example to server/.env and set MONGODB_URI (e.g. mongodb://mongo:27017/yourdb).
 services:
 
   mongo:
@@ -11,7 +12,7 @@ services:
   server:
     build: ./server
     ports:
-      - "5000:3000"
+      - "5000:5000"
     env_file:
       - ./server/.env
     depends_on:

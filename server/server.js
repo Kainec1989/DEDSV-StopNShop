@@ -29,11 +29,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-const allowedOrigins = [
- "http://localhost:3000",
-  "https://dedsv-stopnshop.onrender.com",
-  "https://dedsv-stopnshop-client.onrender.com"
+const defaultOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
 ];
+const extraOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)
+  : [];
+const allowedOrigins = [...new Set([...defaultOrigins, ...extraOrigins])];
 
 app.use(cors({ 
   origin: function(origin, callback) {
