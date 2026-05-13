@@ -13,7 +13,7 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { verifyToken } from "./middleware/verifyToken.js";
 import stripePaymentRoutes from "./routes/stripePayment.js";
-import { errorHandler } from "./utils/chatbotErrorHandler.js";
+import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import chatbotRoutes from "./routes/chatbotRoute.js";
 import bodyParser from "body-parser";
 import cartRoute from "./routes/cartRoute.js";
@@ -60,7 +60,7 @@ app.use("/api/users", userRoutes)
 app.use("/api", accountRoutes);
 app.use("/api", addressRoutes);
 
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 //uptimeRobot monitor route
 app.get("/health", (req, res) => {
