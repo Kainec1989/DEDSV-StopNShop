@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
+import { getApiUrl } from "../../config/api.js";
 
 //  Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -19,10 +20,7 @@ function PayNow() {
   // PROMO CODE
   const applyPromoCode = async () => {
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/promo/apply`,
-        { code: promoCode }
-      );
+      const { data } = await axios.post(`${getApiUrl()}/promo/apply`, { code: promoCode });
       setDiscount(data.discount);
       setFinalTotal(initialTotal - data.discount);
     } catch (error) {
@@ -33,14 +31,11 @@ function PayNow() {
 
   const handlePayNow = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/create-checkout-session`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cart, total: finalTotal, discount }),
-        }
-      );
+      const response = await fetch(`${getApiUrl()}/create-checkout-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart, total: finalTotal, discount }),
+      });
       if (!response.ok) {
         const errorData = await response
           .json()

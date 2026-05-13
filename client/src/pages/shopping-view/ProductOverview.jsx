@@ -4,24 +4,21 @@ import ProductCard from '../../components/shopping-view/ProductCard';
 import ProductSort from '../../components/shopping-view/ProductSort';
 
 function ProductOverview() {
-  console.log('productOverview component start render');
   const [products, setProducts] = useState([]);
-  const [sortOption, setSortOption] = useState('lowest');
+  const [sortOption, setSortOption] = useState("lowest");
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('/api/products');
-        console.log('response', response);
+        const response = await axios.get("/api/products");
         const sortedProducts = response.data.sort((a, b) => a.price - b.price);
         setProducts(sortedProducts);
-        console.log(products);
       } catch (error) {
-        console.error('Error:', error);
+        console.error("Error fetching products:", error);
       }
     };
     fetchProducts();
-  }, []); // Changed dependency array to []
+  }, []);
 
   const handleSort = (value) => {
     const sorted = [...products];

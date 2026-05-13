@@ -15,7 +15,7 @@ const Dashboard = () => {
         
 
         const [ordersResponse, usersResponse] = await Promise.all([
-          axios.get('/api', {
+          axios.get('/api/orders', {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
             },

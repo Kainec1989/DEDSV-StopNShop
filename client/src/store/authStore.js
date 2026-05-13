@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import axios from "axios";
+import { getApiUrl } from "../config/api.js";
 
-const API_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/auth` 
-  : "http://localhost:5000/api/auth";
+const API_URL = `${getApiUrl()}/auth`;
 
 
 export const useAuthStore = create((set) => ({
@@ -29,8 +28,10 @@ export const useAuthStore = create((set) => ({
     try {
       const response = await axios.post(`${API_URL}/login`, { email, password });
       const token = response.data.token;
-      if (token) localStorage.setItem('token', token);
-      set({ user: response.data.user, isAuthenticated: true, isLoading: false });
+      if (token) localStorage.setItem("token", token);
+      const user = response.data.user;
+      set({ user, isAuthenticated: true, isLoading: false });
+      return user;
     } catch (error) {
       set({ error: error.response?.data?.message || "Login failed", isLoading: false });
       throw error;

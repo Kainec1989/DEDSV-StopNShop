@@ -5,9 +5,10 @@ import { CartProvider } from './context/CartContext';
 import App from './App';
 import './index.css';
 import axios from 'axios';
+import { getApiUrl } from './config/api.js';
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+axios.defaults.baseURL = getApiUrl().replace(/\/api\/?$/, '') || 'http://localhost:5000';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

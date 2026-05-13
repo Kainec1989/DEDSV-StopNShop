@@ -72,17 +72,16 @@ function Checkout() {
     }
   
     try {
-      const totalAmount = getCartTotal(); // ✅ Define totalAmount BEFORE using it
-  
+      const totalAmount = getCartTotal();
+
       const orderData = {
         customerName: customer.name,
         email: customer.email,
-        items: cart.map(item => ({
-          name: item.product,
+        cart: cart.map((item) => ({
+          _id: item._id,
           quantity: item.quantity,
-          price: item.price,
+          selectedSize: item.selectedSize,
         })),
-        totalAmount, // ✅ Use the defined totalAmount
         shippingInfo: { ...shippingInfo },
       };
   

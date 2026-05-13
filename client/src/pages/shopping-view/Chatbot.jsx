@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getApiUrl } from "../../config/api.js";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
@@ -58,7 +59,7 @@ const Chatbot = () => {
       // Simulate API delay for demo purposes
       setTimeout(async () => {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/chatbot`, {
+          const response = await fetch(`${getApiUrl()}/chatbot`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

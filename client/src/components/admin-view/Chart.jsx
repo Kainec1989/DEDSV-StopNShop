@@ -21,7 +21,10 @@ const Chart = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get('/api');
+                const token = localStorage.getItem('token');
+                const response = await axios.get('/api/orders', {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
                 const orders = response.data;
 
                 

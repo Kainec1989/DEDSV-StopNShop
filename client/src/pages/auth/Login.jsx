@@ -1,48 +1,34 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore.js";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-
-//import { Link } from "react-router-dom";
-//import axios from "axios";
 
 function AuthLogin() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
 
-  const { login, error, isAuthenticated, user } = useAuthStore();
+  const { login, error } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await login(email, pass);
-      if (isAuthenticated && user.isVerified){
-        navigate("/")
+      const loggedUser = await login(email, pass);
+      toast.success("Logged in successfully");
+
+      if (loggedUser?.role === "admin") {
+        navigate("/admin", { replace: true });
+        return;
       }
-      if (isAuthenticated && user.isVerified && user.role === "admin"){
-        navigate("/admin")
+      if (!loggedUser?.isVerified) {
+        navigate("/verify-email", { replace: true });
+        return;
       }
-      navigate("/home");
-      toast.success("Login successfully");
-    } catch (error) {
-      console.log(error);
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("Login failed:", err);
     }
-
-
   };
-  useEffect(()=>{
-if (isAuthenticated && user.isVerified){
-  navigate("/")
-}
-if (isAuthenticated && user.isVerified && user.role === "admin"){
-  navigate("/admin")
-}
-  })
-  //   axios
-  //    .post("", { name, email, pass })
-  //   .then((result) => console.log(result))
-  //    .catch((err) => console.log(err));
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-[#C5C7CA]">
@@ -83,12 +69,12 @@ if (isAuthenticated && user.isVerified && user.role === "admin"){
           />
           {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
           <div className="mt-2">
-            <a
-              href="/forgot-password"
+            <Link
+              to="/forgot-password"
               className="text-sm text-[#45423D] underline hover:text-[#6C6A61]"
             >
               Forgot Password?
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -103,9 +89,9 @@ if (isAuthenticated && user.isVerified && user.role === "admin"){
       </form>
       <p className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         Dont have an account?{" "}
-        <a href="/register" className="underline decoration-[#45423D]">
+        <Link to="/register" className="underline decoration-[#45423D]">
           Register
-        </a>
+        </Link>
       </p>
     </div>
   );

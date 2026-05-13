@@ -1,16 +1,14 @@
-import express from 'express';
-import { getUsers, createUser, deleteUser } from '../controllers/userController.js';
-import { authenticateToken } from '../middleware/authMiddleware.js';
+import express from "express";
+import { getUsers, createUser, deleteUser } from "../controllers/userController.js";
+import { verifyToken } from "../middleware/verifyToken.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = express.Router();
 
-// Get all users
-router.get('/', getUsers);
+router.use(verifyToken, requireAdmin);
 
-// Create a new user
-router.post('/', createUser);
-
-// Delete a user
-router.delete('/:id', deleteUser);
+router.get("/", getUsers);
+router.post("/", createUser);
+router.delete("/:id", deleteUser);
 
 export default router;
