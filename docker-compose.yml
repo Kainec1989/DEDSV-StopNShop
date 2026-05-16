@@ -1,4 +1,6 @@
-# Local stack: copy server/.env.example to server/.env and set MONGODB_URI (e.g. mongodb://mongo:27017/yourdb).
+# Local stack:
+# - server on host + mongo in Docker: use MONGODB_URI=mongodb://127.0.0.1:27017/stopnshop in server/.env
+# - full Docker Compose stack: server below overrides MONGODB_URI to mongodb://mongo:27017/stopnshop
 services:
 
   mongo:
@@ -15,6 +17,8 @@ services:
       - "5000:5000"
     env_file:
       - ./server/.env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/stopnshop
     depends_on:
       - mongo
     restart: always
