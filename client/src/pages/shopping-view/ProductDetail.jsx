@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useProductData } from '../../hooks/useProductData';
+import ProductDetailSkeleton from '../../components/shopping-view/ProductDetailSkeleton';
 
 /**
  * Product detail page — layout and markup only; data and actions come from {@link useProductData}.
@@ -16,13 +17,7 @@ function ProductDetail() {
     handleAddToCart,
   } = useProductData(id);
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center text-gray-600">
-        Loading…
-      </div>
-    );
-  }
+  if (loading) return <ProductDetailSkeleton />;
 
   if (notFound) {
     return (

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { ZodError } from "zod";
 import { AppError } from "../utils/AppError.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Converts Zod validation issues into stable field-level errors.
@@ -38,7 +39,7 @@ function formatMongooseValidation(err) {
  * @param {import("express").NextFunction} _next
  */
 export const errorMiddleware = (err, req, res, _next) => {
-  console.error("Request error:", {
+  logger.error("Request error", {
     message: err.message,
     name: err.name,
     path: req.originalUrl,

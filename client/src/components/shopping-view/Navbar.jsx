@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import { selectCartItemCount, useCartStore } from "../../store/cartStore.js";
 import { FaBars, FaXmark, FaUser, FaCartShopping } from "react-icons/fa6";
 import Logo from "../../assets/company-logo2.png";
 import { useAuthStore } from "../../store/authStore.js";
@@ -8,10 +8,11 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 function Navbar() {
-  const { cart } = useCart();
+  const itemCount = useCartStore(selectCartItemCount);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { logout, user } = useAuthStore();
+  const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
   const location = useLocation();
 
   // Detect scroll for navbar background change
@@ -158,13 +159,13 @@ function Navbar() {
               >
                 <div className="relative z-10 flex items-center">
                   <FaCartShopping size={18} className="group-hover:text-black transition-colors duration-200" />
-                  {cart.length > 0 && (
+                  {itemCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center transition-transform duration-200 group-hover:bg-gray-800"
                     >
-                      {cart.length}
+                      {itemCount}
                     </motion.span>
                   )}
                   <span className="ml-1 text-sm hidden md:inline group-hover:font-medium transition-all duration-200">

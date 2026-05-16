@@ -15,6 +15,7 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { verifyToken } from "./middleware/verifyToken.js";
 import stripePaymentRoutes from "./routes/stripePayment.js";
+import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import chatbotRoutes from "./routes/chatbotRoute.js";
 import bodyParser from "body-parser";
@@ -22,6 +23,8 @@ import cartRoute from "./routes/cartRoute.js";
 import userRoutes from "./routes/userRoutes.js";
 import accountRoutes from "./routes/accountRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
+import { requestLogger } from "./middleware/requestLogger.js";
+import { logger } from "./utils/logger.js";
 
 //Config
 const __filename = fileURLToPath(import.meta.url);
@@ -52,6 +55,8 @@ app.use(cors({
   },
   credentials: true 
 }));
+app.use(requestLogger);
+app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookRoutes);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -77,5 +82,8 @@ app.get("/health", (req, res) => {
 // Database connection
 app.listen(PORT, () => {
   connectDB();
-  console.log(chalk.bold.bgYellow(`Server listening on port: ${PORT}`));
+  logger.info(`Server listening on port: ${PORT}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(chalk.bold.bgYellow(`Server listening on port: ${PORT}`));
+  }
 });

@@ -5,7 +5,7 @@ import axios from 'axios';
 
 function Account() {
   const location = useLocation();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {

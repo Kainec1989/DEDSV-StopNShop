@@ -9,7 +9,8 @@ function AuthRegister() {
   const [username, setUsername] = useState("");
 
 
-  const { signup, error } = useAuthStore();
+  const signup = useAuthStore((state) => state.signup);
+  const error = useAuthStore((state) => state.error);
   const navigate = useNavigate();
 
 
@@ -18,9 +19,8 @@ function AuthRegister() {
     try {
       await signup(email, password, username);
       navigate("/verify-email");
-      }
-       catch (error) {
-      console.log(error);
+    } catch (error) {
+      console.error("Signup failed:", error);
     }
   };
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { CartProvider } from './context/CartContext';
 import App from './App';
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 import './index.css';
 import axios from 'axios';
 import { getApiUrl } from './config/api.js';
@@ -12,10 +12,10 @@ axios.defaults.baseURL = getApiUrl().replace(/\/api\/?$/, '') || 'http://localho
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <CartProvider>
+    <ErrorBoundary>
+      <BrowserRouter>
         <App />
-      </CartProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 );

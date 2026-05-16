@@ -142,7 +142,7 @@ const LandingPage = () => {
       
       
       {/* CSS for custom animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0% {
             transform: translateY(0) translateX(0);

@@ -1,36 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import { selectCart, selectCartTotal, useCartStore } from "../../store/cartStore.js";
 import axios from "axios";
 
 function Cart() {
-  const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart();
+  const cart = useCartStore(selectCart);
+  const totalBeforeDiscount = useCartStore(selectCartTotal);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
   const navigate = useNavigate();
 
-  const [promoCode, setPromoCode] = useState("");
-  const [discount, setDiscount] = useState(0);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
 
-  const total = getCartTotal() * (1 - discount / 100);
+  const total = totalBeforeDiscount;
 
-  useEffect(() => {
-    if (cart.length > 0) {
-      fetchRecommendations();
-    }
-  }, [cart]);
-
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     try {
       const { data } = await axios.post(
         "/api/recommendations",
         { cart }
       );
-      console.log("Fetched recommendations:", data);
       setRecommendedProducts(data);
     } catch (error) {
       console.error("Error fetching recommendations", error);
     }
-  };
+  }, [cart]);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      fetchRecommendations();
+    } else {
+      setRecommendedProducts([]);
+    }
+  }, [cart.length, fetchRecommendations]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -57,11 +59,11 @@ function Cart() {
                 <div className="flex items-center space-x-4">
                   <img
                     src={item.image}
-                    alt={item.name}
+                    alt={item.product || item.name}
                     className="w-20 h-20 object-cover rounded"
                   />
                   <div>
-                    <h2 className="text-lg font-semibold">{item.name}</h2>
+                    <h2 className="text-lg font-semibold">{item.product || item.name}</h2>
                     <p className="text-gray-600">€{item.price.toFixed(2)}</p>
                     <p className="text-sm text-gray-500">
                       Size: {item.selectedSize}

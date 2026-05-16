@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Layout from '../../components/admin-view/Layout';
+import PageLoader from '../../components/admin-view/PageLoader';
 
 
 const AdminOrders = () => {
     const [orders, setOrders] = useState([]);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
@@ -21,6 +23,8 @@ const AdminOrders = () => {
             } catch (err) {
                 setError(err.response?.data?.message || 'Error fetching orders');
                 console.error('Error fetching orders:', err);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -47,6 +51,10 @@ const AdminOrders = () => {
             console.error('Error deleting order:', err);
         }
     };
+
+    if (loading) {
+        return <PageLoader title="Orders" variant="table" />;
+    }
 
     return (
         <Layout>

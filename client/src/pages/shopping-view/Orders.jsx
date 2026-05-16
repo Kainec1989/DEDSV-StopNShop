@@ -6,7 +6,9 @@ import { useAuthStore } from '../../store/authStore.js';
 function Orders() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, isCheckingAuth } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const user = useAuthStore((state) => state.user);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,7 @@ function Orders() {
     };
 
     fetchOrders();
-  }, [isAuthenticated, isCheckingAuth]);
+  }, [isAuthenticated, isCheckingAuth, navigate]);
 
   const menuItems = [
     { path: '/account', label: 'Account Overview' },

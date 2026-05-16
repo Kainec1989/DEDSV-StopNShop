@@ -24,8 +24,21 @@ const cartLineSchema = z
   })
   .strict();
 
+const shippingInfoSchema = z
+  .object({
+    address: z.string().trim().min(1, "Address is required."),
+    city: z.string().trim().min(1, "City is required."),
+    state: z.string().trim().min(1, "State is required."),
+    postalCode: z.string().trim().min(1, "Postal code is required."),
+    country: z.string().trim().min(1, "Country is required."),
+  })
+  .strict();
+
 export const createCheckoutSessionSchema = z
   .object({
+    customerName: z.string().trim().min(1, "Customer name is required."),
+    email: z.string().trim().email("A valid email is required."),
+    shippingInfo: shippingInfoSchema,
     cart: z
       .array(cartLineSchema, {
         required_error: "Cart is required.",

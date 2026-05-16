@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
-import { useCart } from "../../context/CartContext";
+import { selectCart, selectCartTotal, useCartStore } from "../../store/cartStore.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from '../../store/authStore.js';
+import { loadStripe } from "@stripe/stripe-js";
+import { getApiUrl } from "../../config/api.js";
+
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : Promise.resolve(null);
 
 
 
 
 function Checkout() {
-  const { cart, getCartTotal } = useCart();
+  const cart = useCartStore(selectCart);
+  const totalAmount = useCartStore(selectCartTotal);
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   
   const [shippingInfo, setShippingInfo] = useState({
@@ -29,14 +38,15 @@ function Checkout() {
 
   const [errors, setErrors] = useState({});
   const [showSummary, setShowSummary] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
-    } else {
+    } else if (user) {
       setCustomer({ name: user.name, email: user.email });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -70,11 +80,11 @@ function Checkout() {
       alert("Please fill in all required fields.");
       return;
     }
-  
-    try {
-      const totalAmount = getCartTotal();
 
-      const orderData = {
+    setPaymentLoading(true);
+
+    try {
+      const checkoutData = {
         customerName: customer.name,
         email: customer.email,
         cart: cart.map((item) => ({
@@ -86,19 +96,27 @@ function Checkout() {
       };
   
       const token = localStorage.getItem('token');
-      await axios.post("/api/orders", orderData, {
+      const { data } = await axios.post(`${getApiUrl()}/create-checkout-session`, checkoutData, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         withCredentials: true,
       });
-      toast.success("Order placed successfully!");
-  
-      // ✅ Pass totalAmount to PayNow page
-      navigate("/paynow", { state: { cart, shippingInfo, total: totalAmount } });
-  
-      console.log("Navigating to PayNow with:", { cart, shippingInfo, totalAmount });
+
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error("Stripe is not configured locally. Set VITE_STRIPE_PUBLISHABLE_KEY in client/.env.");
+      }
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.id,
+      });
+
+      if (error) {
+        throw error;
+      }
     } catch (error) {
-      console.error("Order failed:", error.response?.data || error.message);
-      alert(`Failed to place order: ${error.response?.data?.message || "Unknown error"}`);
+      console.error("Checkout failed:", error.response?.data || error.message);
+      toast.error(error.response?.data?.error || error.message || "Unable to start checkout.");
+      setPaymentLoading(false);
     }
   };
   
@@ -205,22 +223,30 @@ function Checkout() {
               <div className="space-y-2 border p-4 rounded bg-gray-100">
                 {cart.map((item, index) => (
                   <div key={`${item._id}-${index}`} className="flex justify-between">
-                    <span> <img src={item.image} className="w-20 h-20 object-cover rounded" /> {item.product} (x{item.quantity})</span>
+                    <span>
+                      <img
+                        src={item.image}
+                        alt={item.product}
+                        className="w-20 h-20 object-cover rounded"
+                      />
+                      {item.product} (x{item.quantity})
+                    </span>
                     <span>€{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
                 <div className="border-t mt-4 pt-4 flex justify-between font-semibold">
                   <span>Total (VAT included):</span>
-                  <span>€{getCartTotal().toFixed(2)}</span>
+                  <span>€{totalAmount.toFixed(2)}</span>
                 </div>
               </div>
             )}
 
             <button
               onClick={handleOrderNow}
+              disabled={paymentLoading}
               className="w-full mt-4 bg-black text-white px-3 py-1 rounded hover:bg-gray-800 text-sm"
             >
-              Order Now
+              {paymentLoading ? "Redirecting to Stripe..." : "Pay with Stripe"}
             </button>
           </div>
         </div>
