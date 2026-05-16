@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Layout from "../../components/admin-view/Layout";
+import PageLoader from "../../components/admin-view/PageLoader";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -10,9 +11,10 @@ const AdminUsers = () => {
   const [role, setRole] = useState("user");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const fetchUsers = async () => {
-    setLoading(true);
+    setInitialLoading(true);
     try {
       const response = await axios.get("/api/users", {
         headers: {
@@ -24,7 +26,7 @@ const AdminUsers = () => {
       setError(err.response?.data?.message || "Error fetching users");
       console.error("Error fetching users:", err);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -90,6 +92,10 @@ const AdminUsers = () => {
     }
   };
 
+  if (initialLoading) {
+    return <PageLoader title="Users" variant="users" />;
+  }
+
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-4">Users</h1>
@@ -152,40 +158,36 @@ const AdminUsers = () => {
         </form>
       </div>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="text-left">ID</th>
-                <th className="text-left">Name</th>
-                <th className="text-left">Email</th>
-                <th className="text-left">Role</th>
-                <th className="text-left">Actions</th>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="text-left">ID</th>
+              <th className="text-left">Name</th>
+              <th className="text-left">Email</th>
+              <th className="text-left">Role</th>
+              <th className="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user._id} className="border-t">
+                <td className="py-2">{user._id}</td>
+                <td className="py-2">{user.name}</td>
+                <td className="py-2">{user.email}</td>
+                <td className="py-2">{user.role}</td>
+                <td className="py-2">
+                  <button
+                    onClick={() => handleDeleteUser(user._id)}
+                    className="text-red-500 hover:text-red-700"
+                    disabled={loading}
+                  >
+                    {loading ? "Deleting..." : "Delete"}
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user._id} className="border-t">
-                  <td className="py-2">{user._id}</td>
-                  <td className="py-2">{user.name}</td>
-                  <td className="py-2">{user.email}</td>
-                  <td className="py-2">{user.role}</td>
-                  <td className="py-2">
-                    <button
-                      onClick={() => handleDeleteUser(user._id)}
-                      className="text-red-500 hover:text-red-700"
-                      disabled={loading}
-                    >
-                      {loading ? "Deleting..." : "Delete"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
     </Layout>
   );

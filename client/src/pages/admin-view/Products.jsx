@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Layout from '../../components/admin-view/Layout';
+import PageLoader from '../../components/admin-view/PageLoader';
 
 const AdminProducts = () => {
     const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [newProduct, setNewProduct] = useState({
         product: '',
         price: '',
@@ -25,6 +27,8 @@ const AdminProducts = () => {
                 setProducts(response.data);
             } catch (err) {
                 console.error('Error fetching products:', err);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -80,6 +84,10 @@ const AdminProducts = () => {
             console.error('Error deleting product:', err);
         }
     };
+
+    if (loading) {
+        return <PageLoader title="Products" variant="products" />;
+    }
 
     return (
         <Layout>

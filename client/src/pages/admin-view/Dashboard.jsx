@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Layout from "../../components/admin-view/Layout";
 import Chart from '../../components/admin-view/Chart';
+import PageLoader from "../../components/admin-view/PageLoader";
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -8,6 +9,7 @@ const Dashboard = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -40,11 +42,17 @@ const Dashboard = () => {
       } catch (err) {
         setError(err.response?.data?.message || 'Error fetching dashboard data');
         console.error('Error fetching dashboard data:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchDashboardData();
   }, []);
+
+  if (loading) {
+    return <PageLoader title="Dashboard" variant="dashboard" />;
+  }
 
   return (
     <Layout>
