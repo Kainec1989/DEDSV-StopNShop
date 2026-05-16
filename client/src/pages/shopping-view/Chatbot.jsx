@@ -94,6 +94,7 @@ const Chatbot = () => {
         }
       }, 1000);
     } catch (error) {
+      console.error("Unexpected chatbot error:", error);
       setIsTyping(false);
       setIsLoading(false);
     }
@@ -271,7 +272,7 @@ const Chatbot = () => {
       </button>
 
       {/* Global CSS for animations */}
-      <style jsx global>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

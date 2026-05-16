@@ -1,8 +1,6 @@
-
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Maps from './Maps';
-import { ChevronDown, ChevronUp, MapPin, Clock, Phone, Mail } from 'lucide-react';
+import { ChevronDown, MapPin, Clock, Phone } from 'lucide-react';
 
 const OurStores = () => {
     // State management

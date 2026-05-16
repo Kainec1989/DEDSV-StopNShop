@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 function Background() {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(null);
 
   // Set page as loaded after initial render
   useEffect(() => {
@@ -34,7 +33,7 @@ function Background() {
         <div className={`relative z-10 flex items-center justify-center h-full transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
           <div className="text-center text-white p-4 transform transition-all duration-700 hover:scale-105">
             <h1 className="text-3xl md:text-5xl font-bold mb-6 drop-shadow-lg tracking-wider">
-              MEN'S COLLECTION
+              MEN&apos;S COLLECTION
             </h1>
             <button
               onClick={() => navigate("/category/male")}
@@ -54,10 +53,8 @@ function Background() {
         
         <div className="flex flex-col lg:flex-row justify-center items-center gap-8 md:gap-10">
           {/* Women's Category */}
-          <div 
+          <div
             className={`relative flex-grow text-center w-full lg:w-1/3 h-96 md:h-112 mb-8 lg:mb-0 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
-            onMouseEnter={() => setActiveCategory('women')} 
-            onMouseLeave={() => setActiveCategory(null)}
           >
             <div className="absolute inset-0 overflow-hidden rounded-lg shadow-lg group cursor-pointer">
               <img
@@ -80,10 +77,8 @@ function Background() {
           </div>
 
           {/* Men's Category */}
-          <div 
+          <div
             className={`relative flex-grow text-center w-full lg:w-1/3 h-96 md:h-112 mb-8 lg:mb-0 transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
-            onMouseEnter={() => setActiveCategory('men')} 
-            onMouseLeave={() => setActiveCategory(null)}
           >
             <div className="absolute inset-0 overflow-hidden rounded-lg shadow-lg group cursor-pointer">
               <img
@@ -106,10 +101,8 @@ function Background() {
           </div>
 
           {/* Accessories Category */}
-          <div 
+          <div
             className={`relative flex-grow text-center w-full lg:w-1/3 h-96 md:h-112 transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
-            onMouseEnter={() => setActiveCategory('accessories')} 
-            onMouseLeave={() => setActiveCategory(null)}
           >
             <div className="absolute inset-0 overflow-hidden rounded-lg shadow-lg group cursor-pointer">
               <img
@@ -148,7 +141,7 @@ function Background() {
         <div className={`relative z-10 flex items-center justify-center h-full transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
           <div className="text-center text-white p-4 transform transition-all duration-700 hover:scale-105">
             <h1 className="text-3xl md:text-5xl font-bold mb-6 drop-shadow-lg tracking-wider">
-              WOMEN'S COLLECTION
+              WOMEN&apos;S COLLECTION
             </h1>
             <button
               onClick={() => navigate("/category/female")}

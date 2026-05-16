@@ -10,11 +10,9 @@ function Cart() {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const navigate = useNavigate();
 
-  const [promoCode, setPromoCode] = useState("");
-  const [discount, setDiscount] = useState(0);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
 
-  const total = totalBeforeDiscount * (1 - discount / 100);
+  const total = totalBeforeDiscount;
 
   const fetchRecommendations = useCallback(async () => {
     try {

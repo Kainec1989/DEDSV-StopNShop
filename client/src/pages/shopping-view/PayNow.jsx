@@ -14,7 +14,7 @@ function PayNow() {
   //const { cart, shippingInfo, total: initialTotal } = state;
   const location = useLocation();
   const state = location.state || {}; // Ensure state is always an object
-  const { cart = [], shippingInfo = {}, total: initialTotal = 0 } = state;
+  const { cart = [], total: initialTotal = 0 } = state;
   
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -26,6 +26,7 @@ function PayNow() {
       setDiscount(data.discount);
       setFinalTotal(initialTotal - data.discount);
     } catch (error) {
+      console.error("Promo code apply error:", error);
       alert("Invalid promo code");
     }
   };

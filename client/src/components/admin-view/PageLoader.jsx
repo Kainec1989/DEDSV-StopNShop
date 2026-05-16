@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import Layout from "./Layout";
 
 const variantConfig = {

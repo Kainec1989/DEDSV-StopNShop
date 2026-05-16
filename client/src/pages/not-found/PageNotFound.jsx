@@ -45,7 +45,7 @@ const PageNotFound = () => {
         </h2>
         
         <p className="text-lg text-gray-600 mb-6 max-w-md mx-auto">
-          The page you are looking for seems to have wandered off into the digital wilderness. Let's get you back on track.
+          The page you are looking for seems to have wandered off into the digital wilderness. Let&apos;s get you back on track.
         </p>
         
         <div className="flex justify-center space-x-4">
