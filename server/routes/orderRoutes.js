@@ -1,17 +1,19 @@
 import express from "express";
 import {
-  createOrder,
   getAllOrdersAdmin,
   deleteOrderAdmin,
 } from "../controllers/orderController.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { AppError } from "../utils/AppError.js";
 
 const router = express.Router();
 
-/** Guest or logged-in checkout */
-router.post("/orders", asyncHandler(createOrder));
+/** Orders must be created by the Stripe webhook after payment confirmation. */
+router.post("/orders", asyncHandler(async () => {
+  throw new AppError("Direct order creation is disabled. Use Stripe Checkout.", 410);
+}));
 
 /** Admin: list all orders */
 router.get("/orders", verifyToken, requireAdmin, asyncHandler(getAllOrdersAdmin));

@@ -4,6 +4,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from '../../store/authStore.js';
+import { loadStripe } from "@stripe/stripe-js";
+import { getApiUrl } from "../../config/api.js";
+
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : Promise.resolve(null);
 
 
 
@@ -31,6 +38,7 @@ function Checkout() {
 
   const [errors, setErrors] = useState({});
   const [showSummary, setShowSummary] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   
   useEffect(() => {
     if (!isAuthenticated) {
@@ -72,9 +80,11 @@ function Checkout() {
       alert("Please fill in all required fields.");
       return;
     }
-  
+
+    setPaymentLoading(true);
+
     try {
-      const orderData = {
+      const checkoutData = {
         customerName: customer.name,
         email: customer.email,
         cart: cart.map((item) => ({
@@ -86,16 +96,27 @@ function Checkout() {
       };
   
       const token = localStorage.getItem('token');
-      await axios.post("/api/orders", orderData, {
+      const { data } = await axios.post(`${getApiUrl()}/create-checkout-session`, checkoutData, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         withCredentials: true,
       });
-      toast.success("Order placed successfully!");
-  
-      navigate("/paynow", { state: { cart, shippingInfo, total: totalAmount } });
+
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error("Stripe is not configured locally. Set VITE_STRIPE_PUBLISHABLE_KEY in client/.env.");
+      }
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.id,
+      });
+
+      if (error) {
+        throw error;
+      }
     } catch (error) {
-      console.error("Order failed:", error.response?.data || error.message);
-      alert(`Failed to place order: ${error.response?.data?.message || "Unknown error"}`);
+      console.error("Checkout failed:", error.response?.data || error.message);
+      toast.error(error.response?.data?.error || error.message || "Unable to start checkout.");
+      setPaymentLoading(false);
     }
   };
   
@@ -222,9 +243,10 @@ function Checkout() {
 
             <button
               onClick={handleOrderNow}
+              disabled={paymentLoading}
               className="w-full mt-4 bg-black text-white px-3 py-1 rounded hover:bg-gray-800 text-sm"
             >
-              Order Now
+              {paymentLoading ? "Redirecting to Stripe..." : "Pay with Stripe"}
             </button>
           </div>
         </div>

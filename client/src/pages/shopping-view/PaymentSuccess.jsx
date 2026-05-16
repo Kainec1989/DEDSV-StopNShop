@@ -1,14 +1,71 @@
 import { runConfetti } from "../../utils/confetti.js";
-import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getApiUrl } from "../../config/api.js";
+import { useCartStore } from "../../store/cartStore.js";
 
 function PaymentSuccess() {
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+  const clearCart = useCartStore((state) => state.clearCart);
+  const [status, setStatus] = useState("checking");
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!sessionId) {
+      setStatus("missing-session");
+      return;
+    }
 
-    runConfetti();
+    let cancelled = false;
+    let attempts = 0;
 
-  }, []);
+    const verifyPayment = async () => {
+      attempts += 1;
+
+      try {
+        const response = await fetch(`${getApiUrl()}/checkout-session/${sessionId}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to verify payment status.");
+        }
+
+        if (data.status === "completed" && data.order?.isPaid) {
+          if (!cancelled) {
+            clearCart();
+            runConfetti();
+            setStatus("completed");
+          }
+          return;
+        }
+
+        if (attempts < 8) {
+          setTimeout(verifyPayment, 1500);
+          return;
+        }
+
+        if (!cancelled) {
+          setStatus("pending");
+        }
+      } catch (err) {
+        console.error("Payment verification failed:", err);
+        if (!cancelled) {
+          setError(err.message);
+          setStatus("error");
+        }
+      }
+    };
+
+    verifyPayment();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clearCart, sessionId]);
+
+  const isCompleted = status === "completed";
+
   return (
          <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
           <div className="bg-white shadow-lg rounded-lg p-8 text-center max-w-md">
@@ -24,10 +81,29 @@ function PaymentSuccess() {
                 clipRule="evenodd"
               />
             </svg>
-            <h2 className="text-2xl font-bold text-gray-800">Payment Successful!</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {isCompleted ? "Payment Successful!" : "Verifying Payment"}
+            </h2>
             <p className="text-gray-600 mt-2">
-              Thank you for your purchase at the DEDSV store. Your order has been processed successfully.
+              {isCompleted
+                ? "Thank you for your purchase at the DEDSV store. Your order has been processed successfully."
+                : "We are waiting for Stripe to confirm your payment. This usually takes a few seconds."}
             </p>
+            {status === "pending" && (
+              <p className="text-amber-600 mt-4 text-sm">
+                Payment is still pending. Refresh this page shortly or check your orders in a moment.
+              </p>
+            )}
+            {status === "missing-session" && (
+              <p className="text-red-500 mt-4 text-sm">
+                Missing Stripe session id. Please check your account orders before trying again.
+              </p>
+            )}
+            {status === "error" && (
+              <p className="text-red-500 mt-4 text-sm">
+                {error || "Unable to verify payment status."}
+              </p>
+            )}
             <Link
               to="/account"
               className="mt-6 inline-block bg-[#45423D] text-white py-2 px-6 rounded-lg hover:bg-[#C5C7CA] transition"

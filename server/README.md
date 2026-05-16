@@ -46,3 +46,14 @@
 ├── .env                  # Environment variables
 ├── server.js             # Entry point
 └── package.json
+
+## Stripe Webhook Development
+
+Stripe Checkout uses the webhook as the source of truth for paid orders. Configure
+`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `CLIENT_URL` in `server/.env`.
+
+For local testing, forward Stripe events to the raw webhook endpoint:
+
+```bash
+stripe listen --forward-to localhost:5000/api/stripe/webhook
+```

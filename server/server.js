@@ -15,6 +15,7 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { verifyToken } from "./middleware/verifyToken.js";
 import stripePaymentRoutes from "./routes/stripePayment.js";
+import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import chatbotRoutes from "./routes/chatbotRoute.js";
 import bodyParser from "body-parser";
@@ -52,6 +53,7 @@ app.use(cors({
   },
   credentials: true 
 }));
+app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookRoutes);
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
