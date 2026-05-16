@@ -4,8 +4,10 @@ import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { getApiUrl } from "../../config/api.js";
 
-//  Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : Promise.resolve(null);
 
 function PayNow() {
   //const { state } = useLocation();
@@ -49,6 +51,7 @@ function PayNow() {
       const stripe = await stripePromise;
       if (!stripe) {
         console.error("Stripe failed to load");
+        alert("Stripe is not configured locally. Set VITE_STRIPE_PUBLISHABLE_KEY in client/.env.");
         return;
       }
 

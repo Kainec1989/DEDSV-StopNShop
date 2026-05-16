@@ -1,6 +1,8 @@
 import express from "express";
 import mongoose, { connect } from "mongoose";
 import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -22,7 +24,9 @@ import accountRoutes from "./routes/accountRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
 
 //Config
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 
 // Port
