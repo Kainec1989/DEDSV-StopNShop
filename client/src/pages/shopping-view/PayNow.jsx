@@ -36,7 +36,13 @@ function PayNow() {
       const response = await fetch(`${getApiUrl()}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart, total: finalTotal, discount }),
+        body: JSON.stringify({
+          cart: cart.map((item) => ({
+            _id: item._id,
+            quantity: item.quantity,
+            selectedSize: item.selectedSize,
+          })),
+        }),
       });
       if (!response.ok) {
         const errorData = await response
