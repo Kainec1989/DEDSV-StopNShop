@@ -33,7 +33,9 @@ import Contact from "./components/shopping-view/Contact.jsx";
 import CategoryProducts from "./pages/shopping-view/CategoryProducts.jsx";
 
 const ProtectRoutes = () => {
-  const { isAuthenticated, user, isCheckingAuth } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
 
   if (isCheckingAuth) {
     return (
@@ -50,7 +52,8 @@ const ProtectRoutes = () => {
 };
 
 function App() {
-  const { isCheckingAuth, checkAuth } = useAuthStore();
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
 

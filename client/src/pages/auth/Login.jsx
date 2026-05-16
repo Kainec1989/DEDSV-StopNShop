@@ -7,7 +7,8 @@ function AuthLogin() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
 
-  const { login, error } = useAuthStore();
+  const login = useAuthStore((state) => state.login);
+  const error = useAuthStore((state) => state.error);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {

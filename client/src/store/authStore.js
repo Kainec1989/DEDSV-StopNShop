@@ -70,7 +70,7 @@ export const useAuthStore = create((set) => ({
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       set({ user: response.data.user, isAuthenticated: true, isCheckingAuth: false });
-    } catch (error) {
+    } catch {
       set({ isAuthenticated: false, isCheckingAuth: false, user: null });
     }
   },

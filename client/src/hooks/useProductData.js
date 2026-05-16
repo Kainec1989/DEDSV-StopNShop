@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '../store/cartStore.js';
 
 /**
  * Loads a single product by id, manages size selection and add-to-cart navigation.
@@ -20,7 +20,7 @@ import { useCart } from '../context/CartContext';
  */
 export function useProductData(productId) {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const addToCart = useCartStore((state) => state.addToCart);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

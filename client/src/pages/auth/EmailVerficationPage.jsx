@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../../store/authStore.js";
@@ -9,7 +9,9 @@ const EmailVerificationPage = () => {
   const inputRefs = useRef([]);
   const navigate = useNavigate();
 
-  const { error, isLoading, verifyEmail } = useAuthStore();
+  const error = useAuthStore((state) => state.error);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const verifyEmail = useAuthStore((state) => state.verifyEmail);
 
   const handleChange = (index, value) => {
     const newCode = [...code];
@@ -43,24 +45,28 @@ const EmailVerificationPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submitVerification = useCallback(async () => {
     const verificationCode = code.join("");
     try {
       await verifyEmail(verificationCode);
       navigate("/home");
       toast.success("Email verified successfully");
     } catch (error) {
-      console.log(error);
+      console.error("Email verification failed:", error);
     }
+  }, [code, navigate, verifyEmail]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await submitVerification();
   };
 
   // Auto submit when all fields are filled
   useEffect(() => {
     if (code.every((digit) => digit !== "")) {
-      handleSubmit(new Event("submit"));
+      submitVerification();
     }
-  }, [code]);
+  }, [code, submitVerification]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
