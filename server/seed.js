@@ -1,8 +1,15 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import bcryptjs from "bcryptjs";
 import Product from "./models/Product.js";
+import PromoCode from "./models/promoCode.js";
+import User from "./models/User.js";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const products = [
   // ===== MALE (20 products) =====
@@ -352,14 +359,61 @@ const products = [
   { product: "Statement Ring", price: 74.99, description: "A bold statement ring in premium gold that demands to be noticed.", image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80", category: "jewerely", sizes: [{ size: "One Size", countInStock: 15 }] }
 ];
 
+const promoCodes = [
+  { code: "WELCOME10", discount: 10 },
+  { code: "LOCAL20", discount: 20 },
+];
+
+/**
+ * Creates or replaces the local admin user used for a fresh development database.
+ *
+ * @returns {Promise<void>}
+ */
+async function seedAdminUser() {
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@localhost.test";
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "Admin12345!";
+  const adminName = process.env.SEED_ADMIN_NAME || "Local Admin";
+
+  const hashedPassword = await bcryptjs.hash(adminPassword, 12);
+  await User.findOneAndUpdate(
+    { email: adminEmail },
+    {
+      name: adminName,
+      email: adminEmail,
+      password: hashedPassword,
+      role: "admin",
+      isVerified: true,
+      verificationToken: undefined,
+      verificationTokenExpireAt: undefined,
+      resetPasswordToken: undefined,
+      resetPasswordExpireAt: undefined,
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true },
+  );
+
+  console.log(`Admin user ready: ${adminEmail}`);
+}
+
 const seedDB = async () => {
   try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI is required. Set it in server/.env before seeding.");
+    }
+
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to:", mongoose.connection.host);
+
     await Product.deleteMany({});
     console.log("Existing products cleared...");
     await Product.insertMany(products);
     console.log(`${products.length} products seeded successfully! ✅`);
+
+    await PromoCode.deleteMany({});
+    await PromoCode.insertMany(promoCodes);
+    console.log(`${promoCodes.length} promo codes seeded successfully! ✅`);
+
+    await seedAdminUser();
+
     mongoose.connection.close();
     process.exit(0);
   } catch (error) {
