@@ -75,6 +75,32 @@ export async function getCartProductDetails(cartPayload) {
 }
 
 /**
+ * Full-text search across `product` (name) and `description` fields using
+ * the MongoDB text index defined on the Product schema.
+ *
+ * Results are sorted by relevance score (descending): name matches are ranked
+ * higher than description matches because the text index assigns `product`
+ * a weight of 3 vs. 1 for `description`.
+ *
+ * @param {string} query - Raw search string from the client (e.g. "sneaker").
+ * @param {number} [limit=20] - Maximum number of results to return.
+ * @returns {Promise<object[]>} Array of product documents enriched with `score`.
+ */
+export async function searchProducts(query, limit = 20) {
+  if (!query || !query.trim()) {
+    throw new AppError("Search query must not be empty.", 400);
+  }
+
+  return Product.find(
+    { $text: { $search: query.trim() } },
+    { score: { $meta: "textScore" } },
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .limit(limit)
+    .lean();
+}
+
+/**
  * Persists a new product document.
  *
  * @param {{

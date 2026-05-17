@@ -51,6 +51,22 @@ export const createProduct = async (req, res) => {
 };
 
 /**
+ * GET /search?q=<term> — full-text product search sorted by relevance.
+ *
+ * Query params:
+ *   q     {string}  Search term (required).
+ *   limit {number}  Max results (optional, default 20, max 100).
+ *
+ * @type {import("express").RequestHandler}
+ */
+export const searchProducts = async (req, res) => {
+  const { q, limit } = req.query;
+  const parsedLimit = Math.min(parseInt(limit, 10) || 20, 100);
+  const results = await productService.searchProducts(q, parsedLimit);
+  res.json(results);
+};
+
+/**
  * DELETE /:id — remove product.
  *
  * @type {import("express").RequestHandler}
