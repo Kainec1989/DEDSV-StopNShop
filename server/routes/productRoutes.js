@@ -9,11 +9,17 @@ import {
   getProductDetailsForCart,
   createProduct,
   deleteProduct,
+  searchProducts,
 } from "../controllers/productController.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = express.Router();
 
+// /search muss vor /:id stehen, damit Express es nicht als Produkt-ID parst.
+router.get(
+  "/search",
+  asyncHandler(searchProducts),
+);
 router.get(
   "/category/:cat",
   asyncHandler(getProductsByCategory),
