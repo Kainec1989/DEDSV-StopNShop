@@ -78,26 +78,34 @@ export async function getCartProductDetails(cartPayload) {
  * Full-text search across `product` (name) and `description` fields using
  * the MongoDB text index defined on the Product schema.
  *
- * Results are sorted by relevance score (descending): name matches are ranked
- * higher than description matches because the text index assigns `product`
- * a weight of 3 vs. 1 for `description`.
+ * MongoDB uses the compound text index `ProductTextSearch` to avoid a COLLSCAN.
+ * The `$meta: "textScore"` projection attaches a relevance score to every
+ * document; the subsequent `.sort` uses the same meta-expression so the most
+ * relevant matches surface first.
  *
- * @param {string} query - Raw search string from the client (e.g. "sneaker").
- * @param {number} [limit=20] - Maximum number of results to return.
- * @returns {Promise<object[]>} Array of product documents enriched with `score`.
+ * Score weighting (defined in the index):
+ *   product (name)  → weight 3  — name hits rank higher
+ *   description     → weight 1  — description hits rank lower
+ *
+ * @param {string} query        - Raw search string from the client (e.g. "sneaker").
+ * @param {number} [limit=20]   - Maximum number of results (1–100).
+ * @returns {Promise<Array<{score: number, product: string, price: number, category: string, description: string, image: string, sizes: object[]}>>}
+ *   Documents sorted by descending textScore, each including a `score` field.
  */
 export async function searchProducts(query, limit = 20) {
   if (!query || !query.trim()) {
     throw new AppError("Search query must not be empty.", 400);
   }
 
-  return Product.find(
+  const hits = await Product.find(
     { $text: { $search: query.trim() } },
     { score: { $meta: "textScore" } },
   )
     .sort({ score: { $meta: "textScore" } })
     .limit(limit)
     .lean();
+
+  return hits;
 }
 
 /**
