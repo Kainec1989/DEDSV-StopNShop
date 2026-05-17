@@ -25,6 +25,7 @@ import accountRoutes from "./routes/accountRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
 import { requestLogger } from "./middleware/requestLogger.js";
 import { logger } from "./utils/logger.js";
+import { apiRateLimiter, securityHeaders } from "./middleware/securityMiddleware.js";
 
 //Config
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +56,9 @@ app.use(cors({
   },
   credentials: true 
 }));
+app.use(securityHeaders);
 app.use(requestLogger);
+app.use("/api", apiRateLimiter);
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookRoutes);
 app.use(express.json());
 app.use(cookieParser());
